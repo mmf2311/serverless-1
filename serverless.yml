@@ -1,4 +1,4 @@
-service: serverless-http-api-project-1-mmf2311
+service: c5-mmf2311-i
 frameworkVersion: '3'
 
 provider:
@@ -6,11 +6,18 @@ provider:
   runtime: nodejs18.x
 
 functions:
-  api:
-    handler: index.handler
+  firstfunction:
+    handler: index.firsthandler
     events:
       - httpApi:
-          path: /
+          path: /mohamed
+          method: get
+
+  secondfunction:
+    handler: index.secondhandler
+    events:
+      - httpApi:
+          path: /malik
           method: post
 
 plugins:
