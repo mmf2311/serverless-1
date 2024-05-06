@@ -2,79 +2,16 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "The AWS CloudFormation template for this Serverless application",
   "Resources": {
-    "ServerlessDeploymentBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256"
-              }
-            }
-          ]
-        }
-      }
-    },
-    "ServerlessDeploymentBucketPolicy": {
-      "Type": "AWS::S3::BucketPolicy",
-      "Properties": {
-        "Bucket": {
-          "Ref": "ServerlessDeploymentBucket"
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:*",
-              "Effect": "Deny",
-              "Principal": "*",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "ServerlessDeploymentBucket"
-                      },
-                      "/*"
-                    ]
-                  ]
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "ServerlessDeploymentBucket"
-                      }
-                    ]
-                  ]
-                }
-              ],
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": false
-                }
-              }
-            }
-          ]
-        }
-      }
-    },
-    "ApiLogGroup": {
+    "FirstfunctionLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-http-api-project-1-mmf2311-dev-api"
+        "LogGroupName": "/aws/lambda/c5-mmf2311-i-dev-firstfunction"
+      }
+    },
+    "SecondfunctionLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/c5-mmf2311-i-dev-secondfunction"
       }
     },
     "IamRoleLambdaExecution": {
@@ -102,7 +39,7 @@
               "Fn::Join": [
                 "-",
                 [
-                  "serverless-http-api-project-1-mmf2311",
+                  "c5-mmf2311-i",
                   "dev",
                   "lambda"
                 ]
@@ -120,7 +57,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-http-api-project-1-mmf2311-dev*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/c5-mmf2311-i-dev*:*"
                     }
                   ]
                 },
@@ -131,7 +68,24 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-http-api-project-1-mmf2311-dev*:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/c5-mmf2311-i-dev*:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes"
+                  ],
+                  "Resource": [
+                    "arn:aws:sqs:us-east-1:255945442255:mmf2311-sqs",
+                    {
+                      "Fn::GetAtt": [
+                        "MalikQueue",
+                        "Arn"
+                      ]
                     }
                   ]
                 }
@@ -144,7 +98,7 @@
           "Fn::Join": [
             "-",
             [
-              "serverless-http-api-project-1-mmf2311",
+              "c5-mmf2311-i",
               "dev",
               {
                 "Ref": "AWS::Region"
@@ -155,18 +109,16 @@
         }
       }
     },
-    "ApiLambdaFunction": {
+    "FirstfunctionLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-http-api-project-1-mmf2311/dev/1713967072736-2024-04-24T13:57:52.736Z/serverless-http-api-project-1-mmf2311.zip"
+          "S3Bucket": "cohort5.deployment",
+          "S3Key": "serverless/c5-mmf2311-i/dev/1714399359464-2024-04-29T14:02:39.464Z/c5-mmf2311-i.zip"
         },
-        "Handler": "index.handler",
+        "Handler": "index.firsthandler",
         "Runtime": "nodejs18.x",
-        "FunctionName": "serverless-http-api-project-1-mmf2311-dev-api",
+        "FunctionName": "c5-mmf2311-i-dev-firstfunction",
         "MemorySize": 1024,
         "Timeout": 6,
         "Role": {
@@ -177,23 +129,95 @@
         }
       },
       "DependsOn": [
-        "ApiLogGroup"
+        "FirstfunctionLogGroup"
       ]
     },
-    "ApiLambdaVersionqUq0U7wd1D1AI5EGYi9iileWA412gG5AyetR7hHM": {
+    "SecondfunctionLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cohort5.deployment",
+          "S3Key": "serverless/c5-mmf2311-i/dev/1714399359464-2024-04-29T14:02:39.464Z/c5-mmf2311-i.zip"
+        },
+        "Handler": "index.secondhandler",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "c5-mmf2311-i-dev-secondfunction",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "SecondfunctionLogGroup"
+      ]
+    },
+    "FirstfunctionLambdaVersionYIy6dzu9Gqjh2yCT67UZ37oH1LpVlFmsHPO1Aiuo4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "ApiLambdaFunction"
+          "Ref": "FirstfunctionLambdaFunction"
         },
-        "CodeSha256": "/kYQPrbXHUvuu2ED3LBHD1s+497Knw/Lzywh4BpM7UQ="
+        "CodeSha256": "78N+oK6vgwP+Hv+ALGIk2ymt0JWBqdUp/0bwpzTWrVA="
+      }
+    },
+    "SecondfunctionLambdaVersion902yujnPgZndYI2GnTdgWaj0fw0PlfLVDYZ1bUaqM": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SecondfunctionLambdaFunction"
+        },
+        "CodeSha256": "78N+oK6vgwP+Hv+ALGIk2ymt0JWBqdUp/0bwpzTWrVA="
+      }
+    },
+    "FirstfunctionEventSourceMappingSQSMmf2311sqs": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [
+        "IamRoleLambdaExecution"
+      ],
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": "arn:aws:sqs:us-east-1:255945442255:mmf2311-sqs",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "FirstfunctionLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true
+      }
+    },
+    "SecondfunctionEventSourceMappingSQSMalikQueue": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [
+        "IamRoleLambdaExecution"
+      ],
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "MalikQueue",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SecondfunctionLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true
       }
     },
     "HttpApi": {
       "Type": "AWS::ApiGatewayV2::Api",
       "Properties": {
-        "Name": "dev-serverless-http-api-project-1-mmf2311",
+        "Name": "dev-c5-mmf2311-i",
         "ProtocolType": "HTTP"
       }
     },
@@ -210,12 +234,12 @@
         }
       }
     },
-    "ApiLambdaPermissionHttpApi": {
+    "FirstfunctionLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "ApiLambdaFunction",
+            "FirstfunctionLambdaFunction",
             "Arn"
           ]
         },
@@ -247,7 +271,7 @@
         }
       }
     },
-    "HttpApiIntegrationApi": {
+    "HttpApiIntegrationFirstfunction": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -256,7 +280,7 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::GetAtt": [
-            "ApiLambdaFunction",
+            "FirstfunctionLambdaFunction",
             "Arn"
           ]
         },
@@ -264,44 +288,132 @@
         "TimeoutInMillis": 30000
       }
     },
-    "HttpApiRoutePost": {
+    "HttpApiRouteGetMohamed": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "POST /",
+        "RouteKey": "GET /mohamed",
         "Target": {
           "Fn::Join": [
             "/",
             [
               "integrations",
               {
-                "Ref": "HttpApiIntegrationApi"
+                "Ref": "HttpApiIntegrationFirstfunction"
               }
             ]
           ]
         }
       },
-      "DependsOn": "HttpApiIntegrationApi"
+      "DependsOn": "HttpApiIntegrationFirstfunction"
+    },
+    "SecondfunctionLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SecondfunctionLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationSecondfunction": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "SecondfunctionLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePostMalik": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /malik",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationSecondfunction"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationSecondfunction"
+    },
+    "MalikQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "mmf2311-sqs"
+      }
     }
   },
   "Outputs": {
     "ServerlessDeploymentBucketName": {
-      "Value": {
-        "Ref": "ServerlessDeploymentBucket"
-      },
+      "Value": "cohort5.deployment",
       "Export": {
-        "Name": "sls-serverless-http-api-project-1-mmf2311-dev-ServerlessDeploymentBucketName"
+        "Name": "sls-c5-mmf2311-i-dev-ServerlessDeploymentBucketName"
       }
     },
-    "ApiLambdaFunctionQualifiedArn": {
+    "FirstfunctionLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersionqUq0U7wd1D1AI5EGYi9iileWA412gG5AyetR7hHM"
+        "Ref": "FirstfunctionLambdaVersionYIy6dzu9Gqjh2yCT67UZ37oH1LpVlFmsHPO1Aiuo4"
       },
       "Export": {
-        "Name": "sls-serverless-http-api-project-1-mmf2311-dev-ApiLambdaFunctionQualifiedArn"
+        "Name": "sls-c5-mmf2311-i-dev-FirstfunctionLambdaFunctionQualifiedArn"
+      }
+    },
+    "SecondfunctionLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "SecondfunctionLambdaVersion902yujnPgZndYI2GnTdgWaj0fw0PlfLVDYZ1bUaqM"
+      },
+      "Export": {
+        "Name": "sls-c5-mmf2311-i-dev-SecondfunctionLambdaFunctionQualifiedArn"
       }
     },
     "HttpApiId": {
@@ -310,7 +422,7 @@
         "Ref": "HttpApi"
       },
       "Export": {
-        "Name": "sls-serverless-http-api-project-1-mmf2311-dev-HttpApiId"
+        "Name": "sls-c5-mmf2311-i-dev-HttpApiId"
       }
     },
     "HttpApiUrl": {
@@ -335,7 +447,7 @@
         ]
       },
       "Export": {
-        "Name": "sls-serverless-http-api-project-1-mmf2311-dev-HttpApiUrl"
+        "Name": "sls-c5-mmf2311-i-dev-HttpApiUrl"
       }
     }
   }

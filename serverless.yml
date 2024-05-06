@@ -14,6 +14,8 @@ functions:
       - httpApi:
           path: /mohamed
           method: get
+      - sqs:
+          arn: arn:aws:sqs:us-east-1:255945442255:mmf2311-sqs
 
   secondfunction:
     handler: index.secondhandler
@@ -21,6 +23,17 @@ functions:
       - httpApi:
           path: /malik
           method: post
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MalikQueue
+              - Arn
+resources:
+  Resources:
+    MalikQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "mmf2311-sqs"
 
 plugins:
   - serverless-offline

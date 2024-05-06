@@ -1,4 +1,5 @@
 module.exports.firsthandler = async (event) => {
+  console.log(mmf2311)
   console.log(event.body)
   return {
     statusCode: 200,
